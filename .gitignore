@@ -13,3 +13,4 @@ test-img/*
 .DS_Store
 /*.tif
 *.tif
+/test/test-img/intro.md
