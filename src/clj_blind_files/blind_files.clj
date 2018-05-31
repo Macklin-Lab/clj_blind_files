@@ -43,6 +43,5 @@
         (list (.getParent fileio)
               (.getName fileio))))
 
-(pathsplitter test-file)
 
-
+(map pathsplitter (list-files file-end test-dir))
