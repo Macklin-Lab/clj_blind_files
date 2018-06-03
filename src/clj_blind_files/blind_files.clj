@@ -15,8 +15,8 @@
 ;; 1. DONE +list file names of a given ending+
 ;;  a. DONE +exclude those staring with "."+
 ;; 2. DONE +get just file names and split the full path.+
-;; 3. TODO -replace the file name with a uuid random name-
-;; 4. TODO -make a new folder called "Blinded" in the initial folder.-
+;; 3. DONE +replace the file name with a uuid random name+
+;; 4. DONE +make a new folder called "Blinded" in the initial folder.+
 ;; 5. DONE +make a map of old-names:new-names+
 ;; 5. TODO -write old-name, new-name to a KEY.csv in the original folder-
 ;; 6. TODO -write all new-names to a blind-ref.csv in the new folder.-
@@ -26,6 +26,17 @@
 ;; make uuids for blinded names
 (defn uuid [] (str (java.util.UUID/randomUUID)))
 
+;; main entry point. Make blinded folder if it doesn't exist. 
+(defn make-blinded-folder
+  "main entry point. Check if blinded exists. If yes, quit/throw exception
+   else, proceed and return the blinded path after making the folder." 
+  [path] 
+  (let [bp (io/file path "blinded")] 
+    (if (.exists bp) 
+      (throw (Exception. "Blinded files already exist. Quitting"))
+      (.mkdir bp))(str bp)))
+
+;; filtered list of files based on file ending selection
 (defn list-files
     "List files only of a specific ending given a directory. 
   filters out files starting with ."
@@ -34,6 +45,7 @@
    (filter #(.endsWith (str %) ending)
             (.listFiles (io/file dir)))))
 
+;; associate the keys (original files) and values (uuid replaced files) 
 (defn blinded-map
   "returns a map of regular full file paths as keys 
   and full blinded file paths as their values."
@@ -42,10 +54,6 @@
   (for [f files] 
    (assoc {} (str f) 
     (str (io/file (str (.getParent f)) "blinded" (str (uuid) ".tif")))))))
-
-
-;; build new path with old name
-(.exists (io/file (.getParent (io/file test-file)) blind (.getName (io/file test-file))))
 
 
 ;; other functions I may need. 
