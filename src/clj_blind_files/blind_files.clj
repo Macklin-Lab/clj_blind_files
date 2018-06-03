@@ -35,8 +35,14 @@
             (.listFiles (io/file dir)))))
 
 (defn blinded-map
+  "returns a map of regular full file paths as keys 
+  and full blinded file paths as their values."
   [files]
-  (for [f files] (assoc {} (str f) (str (uuid) ".tif"))))
+ (into {}
+  (for [f files] 
+   (assoc {} (str f) 
+    (str (io/file (str (.getParent f)) "blinded" (str (uuid) ".tif")))))))
+
 
 ;; build new path with old name
 (.exists (io/file (.getParent (io/file test-file)) blind (.getName (io/file test-file))))
