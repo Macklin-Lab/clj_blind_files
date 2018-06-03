@@ -17,10 +17,14 @@
 ;; 2. DONE +get just file names and split the full path.+
 ;; 3. TODO -replace the file name with a uuid random name-
 ;; 4. TODO -make a new folder called "Blinded" in the initial folder.-
+;; 5. DONE +make a map of old-names:new-names+
 ;; 5. TODO -write old-name, new-name to a KEY.csv in the original folder-
 ;; 6. TODO -write all new-names to a blind-ref.csv in the new folder.-
 ;; 7. TODO -GUI-
 
+
+;; make uuids for blinded names
+(defn uuid [] (str (java.util.UUID/randomUUID)))
 
 (defn list-files
     "List files only of a specific ending given a directory. 
@@ -30,12 +34,12 @@
    (filter #(.endsWith (str %) ending)
             (.listFiles (io/file dir)))))
 
+(defn blinded-map
+  [files]
+  (for [f files] (assoc {} (str f) (str (uuid) ".tif"))))
+
 ;; build new path with old name
 (.exists (io/file (.getParent (io/file test-file)) blind (.getName (io/file test-file))))
-
-(defn blinded-dir 
-  [path blind-name] 
-  ()) 
 
 
 ;; other functions I may need. 
