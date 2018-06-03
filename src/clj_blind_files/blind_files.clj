@@ -7,11 +7,12 @@
 (def test-dir "/Users/Nick/personal_projects/clj_blind_files/test/test-img")
 (def test-file "/Users/Nick/personal_projects/clj_blind_files/test/test-img/2018-02-25_adult-wt_adultSham3_img041_data_tuned_roi1_decent-img.tif")
 (def file-end ".tif")
-
+(def test-bad "/Users/Nick/personal_projects/clj_blind_files/test/test-img/.hidden-test.tif")
 
 ;; I need a few functions that are composable to finish the raw part of the project. The GUI will be separate
 ;; Functions needed:
 ;; 1. DONE +list file names of a given ending+
+;;  a. DONE +exclude those staring with "."+
 ;; 2. DONE +get just file names and split the full path.+
 ;; 3. TODO -replace the file name with a uuid random name-
 ;; 4. TODO -make a new folder called "Blinded" in the initial folder.-
@@ -20,12 +21,23 @@
 ;; 7. TODO -GUI-
 
 
-(defn list-files
-  "List files only of a specific ending given a directory"
-  ;; fn #1
-  [ending dir]
-  (filter #(.endsWith (str %) ending) (mapv str (filter #(.isFile %) (file-seq (io/file dir))))))
 
+(defn list-files
+  "List files only of a specific ending given a directory. 
+  filters out files starting with ."
+  ;; fn #1
+  [ending dir] 
+  (remove #(.startsWith (str (.getName (io/file %))) ".")
+          (filter #(.endsWith (str %) ending)
+                  (mapv str (filter #(.isFile %)
+                                    (file-seq (io/file dir)))))))
+
+(defn blinded-dir 
+  [path blind-name] 
+  ()) 
+
+
+;; other functions I may need. 
 (defn name
   "return file name"
   [f]
@@ -44,4 +56,3 @@
               (.getName fileio))))
 
 
-(map pathsplitter (list-files file-end test-dir))
