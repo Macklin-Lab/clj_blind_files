@@ -8,6 +8,7 @@
 (def test-file "/Users/Nick/personal_projects/clj_blind_files/test/test-img/2018-02-25_adult-wt_adultSham3_img041_data_tuned_roi1_decent-img.tif")
 (def file-end ".tif")
 (def test-bad "/Users/Nick/personal_projects/clj_blind_files/test/test-img/.hidden-test.tif")
+(def blind "blinded")
 
 ;; I need a few functions that are composable to finish the raw part of the project. The GUI will be separate
 ;; Functions needed:
@@ -21,16 +22,16 @@
 ;; 7. TODO -GUI-
 
 
-
 (defn list-files
-  "List files only of a specific ending given a directory. 
+    "List files only of a specific ending given a directory. 
   filters out files starting with ."
-  ;; fn #1
-  [ending dir] 
+  [ending dir]
   (remove #(.startsWith (str (.getName (io/file %))) ".")
-          (filter #(.endsWith (str %) ending)
-                  (mapv str (filter #(.isFile %)
-                                    (file-seq (io/file dir)))))))
+   (filter #(.endsWith (str %) ending)
+            (.listFiles (io/file dir)))))
+
+;; build new path with old name
+(.exists (io/file (.getParent (io/file test-file)) blind (.getName (io/file test-file))))
 
 (defn blinded-dir 
   [path blind-name] 
