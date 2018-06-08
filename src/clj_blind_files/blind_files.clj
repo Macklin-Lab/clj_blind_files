@@ -2,6 +2,7 @@
 (ns clj-blind-files.blind_files)
 
 (require '[clojure.java.io :as io])
+(require '[clojure.data.csv :as csv])
 
 ;; test values for development
 (def test-dir "/Users/Nick/personal_projects/clj_blind_files/test/test-img")
@@ -56,11 +57,43 @@
     (str (io/file (str (.getParent f)) "blinded" (str (uuid) ".tif")))))))
 
 
-;; other functions I may need. 
 (defn name
   "return file name"
   [f]
   (.getName (io/file f)))
+
+(defn list-map-names
+   [filelist]
+  (for [f filelist] (map name f)))
+
+(defn write-csv 
+  [header file csv] 
+  (with-open [out-file (clojure.java.io/writer file)] 
+             (csv/write-csv out-file (conj csv header))))
+
+;; failing
+(write-csv 
+ ["orig" "blinded"] 
+ (parent (first (first test))) 
+ test)
+;; testing/play below
+
+; make blind map
+(def blind-map
+  (blinded-map
+    (list-files file-end test-dir)))
+
+; now a list of list version
+
+
+(def test 
+ (list-map-names blind-map))
+
+
+(with-open [out-file (  
+                      clojure.java.io/writer "/Users/Nick/personal_projects/clj_blind_files/test/test-img/blinded/KEY.csv")] 
+  (csv/write-csv out-file (conj (list-map-names blind-map) ["original" "blinded"])))
+;; other functions I may need. 
 
 (defn parent
   "return the path"

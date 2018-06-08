@@ -14,3 +14,5 @@ test-img/*
 /*.tif
 *.tif
 /test/test-img/intro.md
+/*.csv
+*.csv
