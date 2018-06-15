@@ -13,9 +13,10 @@
 ;; 3. DONE +replace the file name with a uuid random name+
 ;; 4. DONE +make a new folder called "Blinded" in the initial folder.+
 ;; 5. DONE +make a map of old-names:new-names+
-;; 5. TODO -write old-name, new-name to a KEY.csv in the original folder-
-;; 6. TODO -write all new-names to a blind-ref.csv in the new folder.-
-;; 7. TODO -GUI-
+;; 5. TODO +write old-name, new-name to a KEY.csv in the original folder+
+;; 6. TODO +write all new-names to a blind-ref.csv in the new folder.+
+;; 7. TODO Copy the files
+;; 8. TODO GUI
 
 
 ;; make uuids for blinded names
@@ -55,19 +56,28 @@
   [f]
   (.getName (io/file f)))
 
+(defn key-name 
+ [path]
+ (io/file path "KEY.csv"))
 
-(defn write-csv 
-  [header file csv] 
+(defn blind-key-name
+ [path] 
+ (io/file path "blinded" "blind-key.csv"))
+
+
+(defn write-key-csv
+  [[header blind] file csv] 
   (with-open [out-file (clojure.java.io/writer file)] 
-             (csv/write-csv out-file (conj csv header))))
+    (csv/write-csv out-file 
+     (conj csv (list header blind)))))
+
+;; needs work
+(defn write-blind-key [file csv]
+ (with-open [out-file (clojure.java.io/writer file)] 
+  (csv/write-csv out-file 
+                 (into [["blinded"]] (for [[f v] csv] (vector (str v)))))))
 
 
-(defn parent
-  "return the path"
-  [f]
-  (.getParent (io/file f)))
-
-  
 ;; testing/play below
 
 ;; test values for development
@@ -76,30 +86,22 @@
 (def file-end ".tif")
 (def test-bad "/Users/Nick/personal_projects/clj_blind_files/test/test-img/.hidden-test.tif")
 (def blind "blinded")
+(def header-test ["orig" "blind"])
 
 
-(def blind-t
- (list-files file-end test-dir))
+;; order of the script
 
-; make blind map
-(def blindlist
-  (blinded-list blind-t))
-blindlist
+;; check and make the dir
+(make-blinded-folder test-dir)
 
+;; write real key for unblinding
+(write-key-csv header-test (key-name test-dir) (blinded-list (list-files file-end test-dir)))
 
+;; write blinded key for user
+(write-blind-key (blind-key-name test-dir) (blinded-list (list-files file-end test-dir)))
 
-(with-open [out-file (  
-                      clojure.java.io/writer "/Users/Nick/personal_projects/clj_blind_files/test/test-img/blinded/KEY.csv")] 
-  (csv/write-csv out-file (conj blindlist ["original" "blinded"])))
-;; other functions I may need. 
+;; TODO copy the files
 
-
-;; combine parent and child. 
-(defn pathsplitter
-  "returns a list with the path and filename"
-  [f] (let [fileio (io/file f)]
-        (list (.getParent fileio)
-              (.getName fileio))))
 
 ;; not needed not
 ;; associate the keys (original files) and values (uuid replaced files) 
@@ -117,3 +119,15 @@ blindlist
   "convert the map to a list"
    [filelist]
   (for [f filelist] (map name f)))
+
+;; combine parent and child. 
+(defn pathsplitter
+  "returns a list with the path and filename"
+  [f] (let [fileio (io/file f)]
+        (list (.getParent fileio)
+              (.getName fileio))))
+(defn parent
+  "return the path"
+  [f]
+  (.getParent (io/file f)))
+
