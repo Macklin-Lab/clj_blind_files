@@ -4,12 +4,6 @@
 (require '[clojure.java.io :as io])
 (require '[clojure.data.csv :as csv])
 
-;; test values for development
-(def test-dir "/Users/Nick/personal_projects/clj_blind_files/test/test-img")
-(def test-file "/Users/Nick/personal_projects/clj_blind_files/test/test-img/2018-02-25_adult-wt_adultSham3_img041_data_tuned_roi1_decent-img.tif")
-(def file-end ".tif")
-(def test-bad "/Users/Nick/personal_projects/clj_blind_files/test/test-img/.hidden-test.tif")
-(def blind "blinded")
 
 ;; I need a few functions that are composable to finish the raw part of the project. The GUI will be separate
 ;; Functions needed:
@@ -46,6 +40,68 @@
    (filter #(.endsWith (str %) ending)
             (.listFiles (io/file dir)))))
 
+;; rather than blinded-map, make blinded-list. A list of lists with original name and blinded names
+(defn blinded-list 
+ "make a list of lists containingfiles and uuid blinded names."
+  [files]
+  (into () 
+   (for [f files] 
+    (list f
+     (str (io/file (str (.getParent f)) "blinded" (str (uuid) ".tif")))))))
+
+;; get file names
+(defn name
+  "return file name helper function"
+  [f]
+  (.getName (io/file f)))
+
+
+(defn write-csv 
+  [header file csv] 
+  (with-open [out-file (clojure.java.io/writer file)] 
+             (csv/write-csv out-file (conj csv header))))
+
+
+(defn parent
+  "return the path"
+  [f]
+  (.getParent (io/file f)))
+
+  
+;; testing/play below
+
+;; test values for development
+(def test-dir "/Users/Nick/personal_projects/clj_blind_files/test/test-img")
+(def test-file "/Users/Nick/personal_projects/clj_blind_files/test/test-img/2018-02-25_adult-wt_adultSham3_img041_data_tuned_roi1_decent-img.tif")
+(def file-end ".tif")
+(def test-bad "/Users/Nick/personal_projects/clj_blind_files/test/test-img/.hidden-test.tif")
+(def blind "blinded")
+
+
+(def blind-t
+ (list-files file-end test-dir))
+
+; make blind map
+(def blindlist
+  (blinded-list blind-t))
+blindlist
+
+
+
+(with-open [out-file (  
+                      clojure.java.io/writer "/Users/Nick/personal_projects/clj_blind_files/test/test-img/blinded/KEY.csv")] 
+  (csv/write-csv out-file (conj blindlist ["original" "blinded"])))
+;; other functions I may need. 
+
+
+;; combine parent and child. 
+(defn pathsplitter
+  "returns a list with the path and filename"
+  [f] (let [fileio (io/file f)]
+        (list (.getParent fileio)
+              (.getName fileio))))
+
+;; not needed not
 ;; associate the keys (original files) and values (uuid replaced files) 
 (defn blinded-map
   "returns a map of regular full file paths as keys 
@@ -57,54 +113,7 @@
     (str (io/file (str (.getParent f)) "blinded" (str (uuid) ".tif")))))))
 
 
-(defn name
-  "return file name"
-  [f]
-  (.getName (io/file f)))
-
 (defn list-map-names
+  "convert the map to a list"
    [filelist]
   (for [f filelist] (map name f)))
-
-(defn write-csv 
-  [header file csv] 
-  (with-open [out-file (clojure.java.io/writer file)] 
-             (csv/write-csv out-file (conj csv header))))
-
-;; failing
-(write-csv 
- ["orig" "blinded"] 
- (parent (first (first test))) 
- test)
-;; testing/play below
-
-; make blind map
-(def blind-map
-  (blinded-map
-    (list-files file-end test-dir)))
-
-; now a list of list version
-
-
-(def test 
- (list-map-names blind-map))
-
-
-(with-open [out-file (  
-                      clojure.java.io/writer "/Users/Nick/personal_projects/clj_blind_files/test/test-img/blinded/KEY.csv")] 
-  (csv/write-csv out-file (conj (list-map-names blind-map) ["original" "blinded"])))
-;; other functions I may need. 
-
-(defn parent
-  "return the path"
-  [f]
-  (.getParent (io/file f)))
-
-;; combine parent and child. 
-(defn pathsplitter
-  "returns a list with the path and filename"
-  [f] (let [fileio (io/file f)]
-        (list (.getParent fileio)
-              (.getName fileio))))
-
-
