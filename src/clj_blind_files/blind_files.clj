@@ -13,8 +13,8 @@
 ;; 3. DONE +replace the file name with a uuid random name+
 ;; 4. DONE +make a new folder called "Blinded" in the initial folder.+
 ;; 5. DONE +make a map of old-names:new-names+
-;; 5. TODO +write old-name, new-name to a KEY.csv in the original folder+
-;; 6. TODO +write all new-names to a blind-ref.csv in the new folder.+
+;; 5. DONE +write old-name, new-name to a KEY.csv in the original folder+
+;; 6. DONE +write all new-names to a blind-ref.csv in the new folder.+
 ;; 7. TODO Copy the files
 ;; 8. TODO GUI
 
@@ -75,7 +75,7 @@
 (defn write-blind-key [file csv]
  (with-open [out-file (clojure.java.io/writer file)] 
   (csv/write-csv out-file 
-                 (into [["blinded"]] (for [[f v] csv] (vector (str v)))))))
+                 (into [["blinded"]] (for [[f v] csv] (vector (name v)))))))
 
 
 ;; testing/play below
@@ -89,13 +89,20 @@
 (def header-test ["orig" "blind"])
 
 
+(def bl (blinded-list (list-files file-end test-dir)))
+;; need to destructure the "csv" in order to apply my name function to it and write just file names vs paths. 
+
+
 ;; order of the script
 
 ;; check and make the dir
 (make-blinded-folder test-dir)
 
 ;; write real key for unblinding
-(write-key-csv header-test (key-name test-dir) (blinded-list (list-files file-end test-dir)))
+(write-key-csv header-test 
+  (key-name test-dir) 
+  (blinded-list (list-files file-end test-dir)))
+
 
 ;; write blinded key for user
 (write-blind-key (blind-key-name test-dir) (blinded-list (list-files file-end test-dir)))
